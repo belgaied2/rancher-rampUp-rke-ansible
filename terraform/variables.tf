@@ -22,3 +22,12 @@ variable "keyname" {
   
 }
 
+variable "instance_count" {
+  
+}
+
+variable "ansible_inventory" {
+   default =   "../ansible/hosts"
+}
+
+

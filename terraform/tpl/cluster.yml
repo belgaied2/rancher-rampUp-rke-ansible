@@ -1,0 +1,37 @@
+---
+  nodes:
+    - address: ${rke01_public_ip}
+      hostname_override: rke01
+      internal_address: ${rke01_private_ip}
+      user: ubuntu
+      role:
+        - controlplane
+        - etcd
+        - worker
+    - address: ${rke02_public_ip}
+      hostname_override: rke02
+      internal_address: ${rke02_private_ip}
+      user: ubuntu
+      role:
+        - controlplane
+        - etcd
+        - worker
+    - address: ${rke03_public_ip}
+      hostname_override: rke03
+      internal_address: ${rke03_private_ip}
+      user: ubuntu
+      role:
+        - etcd
+        - worker
+    - address: ${rke04_public_ip}
+      hostname_override: rke04
+      internal_address: ${rke04_private_ip}
+      user: ubuntu
+      role:
+        - worker
+    - address: ${rke05_public_ip}
+      hostname_override: rke05
+      internal_address: ${rke05_private_ip}
+      user: ubuntu
+      role:
+        - worker
