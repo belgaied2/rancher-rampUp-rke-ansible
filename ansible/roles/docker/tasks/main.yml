@@ -1,0 +1,56 @@
+---
+  - name: Remove previous traces of Docker
+    apt: 
+      pkg: 
+      - docker 
+      - docker-engine 
+      - docker.io 
+      - containerd 
+      - runc
+      state: absent
+    become: yes
+
+  - name: Update apt cache and install some apt and http software
+    apt: 
+      pkg:
+      - apt-transport-https 
+      - ca-certificates 
+      - curl 
+      - gnupg-agent 
+      - software-properties-common 
+      update_cache: yes
+      state: present
+    become: yes
+
+  - name: Adding APT key for Docker.com
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+    become : yes
+  
+  - name: Adding APT Repository for Docker.com
+    apt_repository: 
+      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+      state: present
+      update_cache: yes
+    become: yes
+
+  - name: Install Docker and dependencies
+    apt: 
+      pkg:
+      - docker-ce
+      - docker-ce-cli 
+      - containerd.io
+      update_cache: yes
+      state: present
+    become: yes
+
+  - name: Add main user to Docker Group
+    user:
+      name: "{{ ansible_user_id }}"
+      groups: docker
+    become: yes
+
+
+  
+     

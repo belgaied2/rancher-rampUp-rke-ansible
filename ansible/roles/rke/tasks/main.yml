@@ -1,0 +1,24 @@
+---
+  - name: Download RKE from github.com
+    get_url:
+      dest: /usr/bin/rke 
+      url: https://github.com/rancher/rke/releases/download/v1.0.4/rke_linux-amd64
+      mode: 0755
+    become: yes
+
+  - name: Copy cluster.yml file from terraform's template
+    copy:
+      src: cluster.yml
+      dest: "{{ ansible_user_dir }}/cluster.yml"
+      mode: 0600
+
+  - name: Copy private key to access other machines
+    copy:
+      src: mbh.pem
+      dest: "{{ ansible_user_dir }}/.ssh/id_rsa"
+      mode: 0600
+  
+  - name: Create the cluster using RKE up
+    shell:
+      cmd: rke up
+      chdir: "{{ ansible_user_dir }}"

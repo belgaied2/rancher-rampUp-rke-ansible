@@ -1,0 +1,9 @@
+---
+  - hosts: all
+    roles:
+      - docker
+      - kernel_modules
+  
+  - hosts: rke_source
+    roles:
+      - rke
