@@ -1,0 +1,5 @@
+ansible/.DS_Store
+.DS_Store
+ansible/roles/rke/files
+terraform/.terraform
+terraform/.terraform/plugins/darwin_amd64/lock.json

@@ -18,7 +18,26 @@
       dest: "{{ ansible_user_dir }}/.ssh/id_rsa"
       mode: 0600
   
+  - name: Create custom certificates using RKE
+    shell:
+      cmd: rke cert generate-csr
+      chdir: "{{ ansible_user_dir }}"
+  
+  - openssl_privatekey:
+      path: "{{ ansible_user_dir }}/cluster_certs/kube-service-account-token-key.pem"
+      size: 2048 
+
+  - openssl_csr:
+      path: "{{ ansible_user_dir }}/cluster_certs/kube-service-account-token.csr"
+      privatekey_path: "{{ ansible_user_dir }}/cluster_certs/kube-service-account-token-key.pem"
+
+  - openssl_certificate:
+      provider: selfsigned
+      path: "{{ ansible_user_dir }}/cluster_certs/kube-service-account-token.pem"
+      privatekey_path: "{{ ansible_user_dir }}/cluster_certs/kube-service-account-token-key.pem"
+      csr_path: "{{ ansible_user_dir }}/cluster_certs/kube-service-account-token.csr"
+
   - name: Create the cluster using RKE up
     shell:
-      cmd: rke up
+      cmd: rke up --custom-certs ./cluster_certs
       chdir: "{{ ansible_user_dir }}"
