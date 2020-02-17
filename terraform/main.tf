@@ -1,7 +1,5 @@
 provider "aws" {
-   access_key = "${var.aws_key}"
-   secret_key = "${var.aws_secret}"
-   region = "${var.region}"
+   region = var.region
 }
 
 provider "template" {
@@ -19,19 +17,19 @@ data "aws_ami" "ubuntu" {
     owners = ["099720109477"]
 }
 resource "aws_instance" "rke_master" {
-    count  = "${var.instance_count}"
+    count  = var.instance_count
     ami = data.aws_ami.ubuntu.id
     instance_type = "t2.xlarge"
     availability_zone = "eu-central-1b"
-    key_name = "${var.keyname}"
+    key_name = var.keyname
     security_groups = [ "SSH from the world","rancher-nodes" ]
     associate_public_ip_address = true
 
 
     tags = {
         Name = "RampUp-RKE0${count.index+1}"
-        Email = "${var.email}"
-        Owner = "${var.owner}"
+        Email = var.email
+        Owner = var.owner
     }
 
     root_block_device {
@@ -53,7 +51,7 @@ resource "null_resource" "rke_master" {
         command = "sleep 30 && ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i hosts rke.yaml"
     }
 
-    depends_on = ["template_dir.cluster_yaml"]
+    depends_on = [template_dir.cluster_yaml]
 
 }
 
