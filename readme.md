@@ -1,0 +1,2 @@
+# Automation scripts for the deployment of K8s cluster using RKE (Rancher Kubernetes Engine)
+This repository contains automation scripts based on Terraform and Ansible that aim to deploy an RKE Cluster on AWS.

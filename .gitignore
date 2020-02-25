@@ -1,2 +1,3 @@
 terraform/.terraform
 ansible/roles/rke/files/*
+ansible/hosts
