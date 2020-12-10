@@ -1,80 +1,68 @@
-provider "aws" {
-   region = var.region
-}
-
-provider "template" {
-  
-}
-
-
 data "aws_ami" "ubuntu" {
     most_recent = true
     filter {
         name = "name"
-        values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
+        values = [var.aws_ami_selector]
     }
     
-    owners = ["099720109477"]
+    owners = [var.aws_ami_owner_id]
 }
 resource "aws_instance" "rke_master" {
     count  = var.instance_count
     ami = data.aws_ami.ubuntu.id
-    instance_type = "t2.xlarge"
-    availability_zone = "eu-central-1b"
+    instance_type = var.aws_instance_type
+    availability_zone = var.availability_zone
     key_name = var.keyname
-    security_groups = [ "SSH from the world","rancher-nodes" ]
+    security_groups = var.security_groups
     associate_public_ip_address = true
 
 
     tags = {
-        Name = "RampUp-RKE0${count.index+1}"
+        Name = "RKE_0${count.index+1}"
         Email = var.email
         Owner = var.owner
     }
 
     root_block_device {
         volume_type = "gp2"
-        volume_size = 25
+        volume_size = var.aws_disk_size
     }
 
 
 }
 
+resource  "local_file" "cluster_yaml" {
+    content = templatefile("${path.module}/tpl/cluster.yml.tmpl", 
+    {  
+        nodes = aws_instance.rke_master, 
+        ssh_private_key_path = var.ssh_private_key_path,
+        ssh_username = var.ssh_username
+        }
+    )
+    filename = "${path.module}/../ansible/roles/rke/files/cluster.yml"
+
+}
+
+resource  "local_file" "hosts_inventory" {
+    content = templatefile("${path.module}/tpl/hosts.tmpl", 
+    {  
+        nodes = aws_instance.rke_master
+        }
+    )
+    filename = "${path.module}/../ansible/hosts"
+
+}
+
 resource "null_resource" "rke_master" {
-    
-    provisioner "local-exec" {
-        command = "echo '[aws]' > ${var.ansible_inventory} && echo '${join("\n",aws_instance.rke_master.*.public_ip)}' >> ${var.ansible_inventory} && echo '\n[rke_source]\n${aws_instance.rke_master[0].public_ip}' >> ${var.ansible_inventory}  && echo '\n[aws:vars]\nansible_ssh_private_key_file=/Users/mhassine/Downloads/***REMOVED***\nansible_ssh_user=ubuntu' >> ${var.ansible_inventory}"
-    }
 
     provisioner "local-exec" {
         working_dir = "../ansible"
         command = "sleep 30 && ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i hosts rke.yaml"
     }
 
-    depends_on = [template_dir.cluster_yaml]
+    depends_on = [local_file.cluster_yaml, local_file.hosts_inventory]
 
 }
-
-resource  "template_dir" "cluster_yaml" {
-    source_dir = "tpl"
-    destination_dir = "../ansible/roles/rke/files"
-    
-    vars = {
-        rke01_public_ip = aws_instance.rke_master[0].public_ip
-        rke02_public_ip = aws_instance.rke_master[1].public_ip
-        rke03_public_ip = aws_instance.rke_master[2].public_ip
-        rke04_public_ip = aws_instance.rke_master[3].public_ip
-        rke05_public_ip = aws_instance.rke_master[4].public_ip
-        rke01_private_ip = aws_instance.rke_master[0].private_ip
-        rke02_private_ip = aws_instance.rke_master[1].private_ip
-        rke03_private_ip = aws_instance.rke_master[2].private_ip
-        rke04_private_ip = aws_instance.rke_master[3].private_ip
-        rke05_private_ip = aws_instance.rke_master[4].private_ip
-    }
-
-}
-
-
 
 
 

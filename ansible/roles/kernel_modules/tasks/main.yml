@@ -6,6 +6,7 @@
       name: "{{ item }}"
       state: present
     become: yes
+    ignore_errors: yes
     with_items:
       - br_netfilter
       - ip6_udp_tunnel
@@ -41,7 +42,8 @@
 
 
 # Pre-requisite of RKE: https://rancher.com/docs/rke/latest/en/os/
-  - sysctl: 
+  - name: Adding System configurations as a pre-requisite to RKE
+    sysctl: 
       name: net.bridge.bridge-nf-call-iptables
       value: '1'
       state: present

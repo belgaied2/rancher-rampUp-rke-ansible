@@ -1,0 +1,7 @@
+[aws]
+%{ for node in nodes ~}
+${node.public_ip}
+%{ endfor ~}
+
+[aws:vars]
+ansible_ssh_user=ubuntu

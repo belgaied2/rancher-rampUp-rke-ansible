@@ -38,8 +38,8 @@
   - name: Install Docker and dependencies
     apt: 
       pkg:
-      - docker-ce
-      - docker-ce-cli 
+      - docker-ce=5:19.03.14~3-0~ubuntu-bionic
+      - docker-ce-cli=5:19.03.14~3-0~ubuntu-bionic
       - containerd.io
       update_cache: yes
       state: present
@@ -48,7 +48,8 @@
   - name: Add main user to Docker Group
     user:
       name: "{{ ansible_user_id }}"
-      groups: docker
+      groups: 
+      - docker
     become: yes
 
 
